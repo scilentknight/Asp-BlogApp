@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlogApp.Models.ViewModels
 {
@@ -10,6 +11,7 @@ namespace BlogApp.Models.ViewModels
         [ValidateNever]
         public IEnumerable<SelectListItem> Categories { get; set; }
 
+        [Required(ErrorMessage = "Feature image is required.")]
         public IFormFile FeatureImage { get; set; }
     }
 }

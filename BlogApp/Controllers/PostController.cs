@@ -18,12 +18,13 @@ namespace BlogApp.Controllers
             _webHostEnviroment = webHostEnviroment;
         }
 
+        // For the Index action, we will retrieve all posts from the database and pass them to the view. We will also retrieve all categories to display in a dropdown for filtering posts by category.
         [HttpGet]
         public IActionResult Index(int? categoryId)
         {
             var postQuery = _context.Posts.Include(p => p.Category).AsQueryable();
 
-            if(categoryId.HasValue)
+            if (categoryId.HasValue)
             {
                 postQuery = postQuery.Where(p => p.CategoryId == categoryId);
             }
@@ -32,6 +33,7 @@ namespace BlogApp.Controllers
             return View(posts);
         }
 
+        // For the Create action, we will display a form for creating a new post. We will also retrieve all categories to display in a dropdown for selecting the category of the post.
         [HttpGet]
         public IActionResult Create()
         {
@@ -48,6 +50,7 @@ namespace BlogApp.Controllers
             return View(postViewModel);
         }
 
+        // For the Create action, we will handle the form submission for creating a new post. We will validate the model, check the file extension of the uploaded image, and save the post to the database if everything is valid.
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel postViewModel)
         {
@@ -68,6 +71,14 @@ namespace BlogApp.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
+            postViewModel.Categories = _context.Categories
+               .Select(c => new SelectListItem
+               {
+                   Value = c.Id.ToString(),
+                   Text = c.Name
+               })
+               .ToList();
+
             return View(postViewModel);
         }
 
@@ -78,7 +89,7 @@ namespace BlogApp.Controllers
             var wwwRootPath = _webHostEnviroment.WebRootPath;
             var imagesFolderPath = Path.Combine(wwwRootPath, "images");
 
-            if(!Directory.Exists(imagesFolderPath))
+            if (!Directory.Exists(imagesFolderPath))
             {
                 Directory.CreateDirectory(imagesFolderPath);
             }
@@ -87,12 +98,13 @@ namespace BlogApp.Controllers
 
             try
             {
-                await using(var fileStream = new FileStream(filePath, FileMode.Create))
+                await using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
                 }
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return "Error Uploading Image:" + ex.Message;
             }
